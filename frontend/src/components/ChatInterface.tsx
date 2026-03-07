@@ -47,15 +47,14 @@ export default function ChatInterface() {
                     {messages.map((msg, i) => (
                         <div key={i} className="mb-4">
                             <div className="text-right">
-                                <span className="inline-block bg-cyan-600/30 px-4 py-2 rounded-tl-xl rounded-bl-xl rounded-tr-xl">
+                                <span className="inline-block bg-cyan-600/30 text-slate-100 px-4 py-2 rounded-tl-xl rounded-bl-xl rounded-tr-xl">
                                     {msg.user}
                                 </span>
                             </div>
                             {msg.bot && (
                                 <div className="mt-2 text-left">
-                                    <span className="inline-block bg-purple-600/30 px-4 py-2 rounded-tr-xl rounded-br-xl rounded-tl-xl">
+                                    <span className="inline-block bg-purple-600/30 text-slate-100 px-4 py-2 rounded-tr-xl rounded-br-xl rounded-tl-xl whitespace-pre-wrap">
                                         {msg.bot}
-                                        <span className="ml-2 text-xs text-slate-400">Risk: {msg.risk.toFixed(2)}</span>
                                     </span>
                                 </div>
                             )}
@@ -69,7 +68,7 @@ export default function ChatInterface() {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         placeholder="Ask about any breach or echo... e.g., Show echoes for vignesh@example.com"
-                        className="min-h-[60px] bg-slate-900 border-slate-700"
+                        className="min-h-[60px] bg-slate-900 border-slate-700 text-slate-100 placeholder:text-slate-400"
                         onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
                     />
                     <Button onClick={handleSend} disabled={loading} className="bg-cyan-600 hover:bg-cyan-500">

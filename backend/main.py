@@ -10,7 +10,7 @@ from slowapi.errors import RateLimitExceeded
 from fastapi.responses import JSONResponse
 
 from .api.dependencies import limiter
-from .api.v1.endpoints import detection, chat, graph, blockchain, alerts, simulation, forensics
+from .api.v1.endpoints import detection, chat, graph, blockchain, alerts, simulation, forensics, optimize, authentiforge
 from .core.config import settings
 from .core.logger import logger
 from .services.model_loader import model_service
@@ -74,6 +74,8 @@ app.include_router(blockchain.router, prefix=PREFIX)
 app.include_router(alerts.router,     prefix=PREFIX)
 app.include_router(simulation.router, prefix=PREFIX)
 app.include_router(forensics.router,  prefix=PREFIX)
+app.include_router(optimize.router,   prefix=PREFIX)
+app.include_router(authentiforge.router, prefix=PREFIX)
 
 
 # ── Health check ─────────────────────────────────────────────────────────────
@@ -91,5 +93,7 @@ async def health_check():
             f"{PREFIX}/alerts/",
             f"{PREFIX}/simulation/",
             f"{PREFIX}/forensics/",
+            f"{PREFIX}/optimize/",
+            f"{PREFIX}/authentiforge/",
         ],
     }

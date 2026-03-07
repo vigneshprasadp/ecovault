@@ -76,3 +76,37 @@ class GraphResponse(BaseModel):
     edges: List[Dict[str, Any]]
     node_count: int
     edge_count: int
+
+
+# ── Optimizer ────────────────────────────────────────────────────────────────
+class Intervention(BaseModel):
+    id: str
+    action: str
+    hour: int
+    cost: float
+    risk_reduction: float
+
+class OptimizeRequest(BaseModel):
+    source_node: str
+    interventions: List[Intervention] = []
+
+class OptimizeResponse(BaseModel):
+    baseline_risk: List[float]
+    scenario_risk: List[float]
+    optimal_risk: List[float]
+    containment_probability: float
+    time_to_containment: float
+    ethical_score: float
+    optimal_plan: List[Dict[str, Any]]
+
+# ── AuthentiForge ────────────────────────────────────────────────────────────
+class AuthentiForgeResponse(BaseModel):
+    integrity_score: float
+    semantic_score: float
+    frequency_score: float
+    provenance_score: float
+    is_tampered: bool
+    bias_audit_pass: bool
+    heatmap_url: str
+    anonymized_url: str
+    report_summary: str

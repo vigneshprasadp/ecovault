@@ -3,10 +3,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Toaster } from 'sonner';
 import ChatInterface from './components/ChatInterface';
 import GraphDashboard from './components/GraphDashboard';
-import ForensicUploader from './components/ForensicUploader';
-import SimulationPanel from './components/SimulationPanel';
-import AlertDisplay from './components/AlertDisplay';
-import BlockchainLogButton from './components/BlockchainLogButton';
+import AuthentiForgeDashboard from './components/AuthentiForgeDashboard';
+import OptimizerDashboard from './components/OptimizerDashboard';
 
 function App() {
   const [activeTab, setActiveTab] = useState('chat');
@@ -24,13 +22,13 @@ function App() {
         </header>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2 bg-slate-900/80 p-1 border border-slate-800 rounded-xl">
-            <TabsTrigger className="data-[state=active]:bg-cyan-950 data-[state=active]:text-cyan-400 rounded-lg" value="chat">Chat Copilot</TabsTrigger>
-            <TabsTrigger className="data-[state=active]:bg-purple-950 data-[state=active]:text-purple-400 rounded-lg" value="graph">Echo Graph</TabsTrigger>
-            <TabsTrigger className="data-[state=active]:bg-emerald-950 data-[state=active]:text-emerald-400 rounded-lg" value="simulate">Propagation Sim</TabsTrigger>
-            <TabsTrigger className="data-[state=active]:bg-pink-950 data-[state=active]:text-pink-400 rounded-lg" value="forensics">Forensic Trace</TabsTrigger>
-            <TabsTrigger className="data-[state=active]:bg-blue-950 data-[state=active]:text-blue-400 rounded-lg" value="alerts">Alerts & Chain</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2 bg-slate-900/80 p-1 border border-slate-800 rounded-xl">
+            <TabsTrigger className="cursor-pointer select-none data-[state=active]:bg-cyan-950 data-[state=active]:text-cyan-400 rounded-lg" value="chat">Chat Copilot</TabsTrigger>
+            <TabsTrigger className="cursor-pointer select-none data-[state=active]:bg-purple-950 data-[state=active]:text-purple-400 rounded-lg" value="graph">Echo Graph</TabsTrigger>
+            <TabsTrigger className="cursor-pointer select-none data-[state=active]:bg-pink-950 data-[state=active]:text-pink-400 rounded-lg" value="authentiforge">AuthentiForge</TabsTrigger>
+            <TabsTrigger className="cursor-pointer select-none data-[state=active]:bg-indigo-950 data-[state=active]:text-indigo-400 rounded-lg" value="optimize">Response Optimizer</TabsTrigger>
           </TabsList>
+
 
           <div className="mt-6">
             <TabsContent value="chat" className="focus-visible:outline-none focus-visible:ring-0 mt-0">
@@ -41,23 +39,12 @@ function App() {
               <GraphDashboard />
             </TabsContent>
 
-            <TabsContent value="simulate" className="focus-visible:outline-none focus-visible:ring-0 mt-0">
-              <SimulationPanel />
+            <TabsContent value="authentiforge" className="focus-visible:outline-none focus-visible:ring-0 mt-0">
+              <AuthentiForgeDashboard />
             </TabsContent>
 
-            <TabsContent value="forensics" className="focus-visible:outline-none focus-visible:ring-0 mt-0">
-              <ForensicUploader />
-            </TabsContent>
-
-            <TabsContent value="alerts" className="focus-visible:outline-none focus-visible:ring-0 mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-2">
-                  <AlertDisplay />
-                </div>
-                <div>
-                  <BlockchainLogButton />
-                </div>
-              </div>
+            <TabsContent value="optimize" className="focus-visible:outline-none focus-visible:ring-0 mt-0">
+              <OptimizerDashboard />
             </TabsContent>
           </div>
         </Tabs>

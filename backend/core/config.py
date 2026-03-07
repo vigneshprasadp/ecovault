@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
 
+    # External APIs
+    HIBP_API_KEY: str = "none"
+    GROQ_API_KEY: str = ""
+
     @property
     def origins_list(self) -> list[str]:
         return [o.strip() for o in self.ALLOWED_ORIGINS.split(",")]

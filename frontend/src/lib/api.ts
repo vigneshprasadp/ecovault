@@ -43,4 +43,16 @@ export const getGraph = (filter?: string) =>
 export const triggerAlert = (risk: number, echoId: string) =>
     api.post('/alerts/', { risk, echo_id: echoId });
 
+export const optimizeScenario = (sourceNode: string, interventions: any[]) =>
+    api.post('/optimize/', { source_node: sourceNode, interventions });
+
+export const validateEvidence = (file: File, contextText: string) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('context_text', contextText);
+    return api.post('/authentiforge/', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+    });
+};
+
 export default api;

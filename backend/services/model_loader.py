@@ -146,22 +146,98 @@ class ModelService:
         }
 
     def chat_query(self, user_input: str) -> tuple[str, float]:
+        import re
         entities = self._ner(user_input)
         sentiment = self._sentiment(user_input)[0]
+        
+        # 1. Exact Email Search
+        emails_in_query = re.findall(r"[\w\.-]+@[\w\.-]+", user_input)
+        exact_match = None
+        if emails_in_query:
+            target_email = emails_in_query[0].lower()
+            matching_rows = self._breaches_df[self._breaches_df["email"].str.lower() == target_email]
+            if not matching_rows.empty:
+                row = matching_rows.iloc[0]
+                exact_match = {
+                    "email": row["email"],
+                    "company": row["company"],
+                    "severity": row["severity"]
+                }
+        
+        # 2. TF-IDF Fallback
         det = self.detect_echoes(user_input, top_k=1)
-        sev = det["matches"][0]["severity"] if det["matches"] else 0.5
-        base = len(entities) * (
-            sentiment["score"] if sentiment["label"] == "POSITIVE"
-            else 1 - sentiment["score"]
-        )
-        risk = round(min(base * sev, 1.0), 3)
+        sim_score = det["similarities"][0] if det["similarities"] else 0
+        
+        if exact_match:
+            m = exact_match
+            is_match = True
+            sim_score = 1.0
+        else:
+            is_match = bool(det["matches"] and sim_score > 0.45)
+            m = det["matches"][0] if is_match else None
+        
+        sev = m["severity"] if is_match else 0.1
+        
+        # Risk algorithm
+        base_multiplier = 1.0 + (len(entities) * 0.1)
+        sentiment_mod = sentiment["score"] if sentiment["label"] == "NEGATIVE" else (1 - sentiment["score"])
+        
+        if is_match:
+            risk = round(min((sev * base_multiplier) + (sentiment_mod * 0.3), 1.0), 3)
+        else:
+            risk = round(min(sentiment_mod * 0.15 * base_multiplier, 0.4), 3)
+        
+        match_info = ""
+        if is_match:
+            sev_label = "very high" if sev > 0.8 else "moderate" if sev > 0.4 else "low"
+            match_info = (
+                f"I found a record that seems to match your search — "
+                f"it's linked to **{m['company']}** (email: `{m['email']}`). "
+                f"The severity of this breach is rated as **{sev_label}**."
+            )
+        else:
+            match_info = "I didn't find any specific breach records that match your search in our local database."
+
+        # Sentiment-based friendly framing
+        tone = sentiment["label"].lower()
+        if tone == "negative" and sentiment["score"] > 0.6:
+            tone_note = "Your message sounds quite urgent, which I understand — let me help you stay safe."
+        elif tone == "negative":
+            tone_note = "I can sense some concern in your message. Let me share what I know."
+        else:
+            tone_note = "Here's what my analysis found."
+
+        # Entity note
+        entity_note = ""
+        if entities:
+            words = list(set([e["word"] for e in entities]))
+            entity_note = f" (I picked up these terms from your message: {', '.join(words[:4])})"
+
+        # Risk explanation
+        if risk > 0.6:
+            risk_note = f"Based on what I found, the risk level looks **high** ({risk}). I'd recommend taking action soon."
+        elif risk > 0.3:
+            risk_note = f"The risk level appears **moderate** ({risk}). It's worth keeping an eye on this."
+        else:
+            risk_note = f"The risk level looks **low** ({risk}). Things seem okay, but staying cautious never hurts."
+
         response = (
-            f"Entities: {[e['word'] for e in entities]}. "
-            f"Sentiment: {sentiment['label']} ({sentiment['score']:.2f}). "
-            f"Risk: {risk}. Top match: {det['matches'][:1]}"
+            f"{tone_note}\n\n"
+            f"{match_info}{entity_note}\n\n"
+            f"{risk_note}"
         )
+
+        if is_match:
+            response += (
+                "\n\nTo protect yourself, I'd suggest:\n"
+                "1. **Change your password** for any accounts linked to this email\n"
+                "2. **Enable two-step login (2FA)** on your important accounts\n"
+                "3. **Watch out for phishing emails** — hackers often target people after a breach"
+            )
+
         if sentiment["label"] == "NEGATIVE" and sentiment["score"] > 0.7:
-            response += " [Ethical Flag: high negative sentiment]"
+            response += "\n\n💬 If you're worried, feel free to ask me to check a specific email address for a more detailed live scan."
+
         return response, risk
 
     def get_graph_data(self, node_filter: str | None = None) -> dict:
@@ -216,21 +292,24 @@ class ModelService:
         except Exception:
             pass
 
-        # Causal DoWhy estimate
-        causal_data = pd.DataFrame({
-            "breach": [1, 0, 1, 0, 1, 0],
-            "delay":  [24, 12, 48, 5, 36, 8],
-            "severity": [0.8, 0.4, 0.9, 0.1, 0.75, 0.3],
-        })
-        cm = CausalModel(
-            data=causal_data, treatment="delay", outcome="severity",
-            graph="digraph { breach -> delay; delay -> severity; breach -> severity; }",
-        )
-        est = cm.estimate_effect(
-            cm.identify_effect(proceed_when_unidentifiable=True),
-            method_name="backdoor.linear_regression",
-        )
-        causal_effect = round(float(est.value), 3)
+        # Causal DoWhy estimate - cache to avoid severe latency
+        if not hasattr(self, "_cached_causal_effect"):
+            causal_data = pd.DataFrame({
+                "breach": [1, 0, 1, 0, 1, 0],
+                "delay":  [24, 12, 48, 5, 36, 8],
+                "severity": [0.8, 0.4, 0.9, 0.1, 0.75, 0.3],
+            })
+            cm = CausalModel(
+                data=causal_data, treatment="delay", outcome="severity",
+                graph="digraph { breach -> delay; delay -> severity; breach -> severity; }",
+            )
+            est = cm.estimate_effect(
+                cm.identify_effect(proceed_when_unidentifiable=True),
+                method_name="backdoor.linear_regression",
+            )
+            self._cached_causal_effect = round(float(est.value), 3)
+
+        causal_effect = self._cached_causal_effect
 
         return {
             "predicted_path": path,
