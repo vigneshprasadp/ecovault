@@ -1,0 +1,210 @@
+# =============================================================================
+# EchoVault — .gitignore
+# Python/FastAPI Backend + React Frontend + ML/AI Models
+# =============================================================================
+
+
+# =============================================================================
+# ENVIRONMENT & SECRETS
+# =============================================================================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+secrets/
+
+
+# =============================================================================
+# PYTHON
+# =============================================================================
+
+# Bytecode / cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env/
+ENV/
+virtualenv/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+.eggs/
+MANIFEST
+
+# Testing & coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pytype/
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# pyenv
+.python-version
+
+
+# =============================================================================
+# ML / AI MODELS  (large binary files — store with Git LFS if needed)
+# =============================================================================
+models/*.pkl
+models/*.pt
+models/*.h5
+models/*.keras
+models/*.onnx
+models/*.bin
+models/*.safetensors
+models/*.gexf
+
+# Keep the models directory itself tracked
+!models/.gitkeep
+
+
+# =============================================================================
+# DATA
+# =============================================================================
+
+# Generated / synthetic datasets
+data/raw/
+data/breaches/
+data/echoes/
+data/**/*.csv
+data/**/*.json
+data/**/*.parquet
+data/**/*.feather
+data/**/*.arrow
+
+# Keep the directory structure
+!data/.gitkeep
+!data/raw/.gitkeep
+!data/breaches/.gitkeep
+!data/echoes/.gitkeep
+
+
+# =============================================================================
+# LOGS & TEMPORARY OUTPUT FILES
+# =============================================================================
+*.log
+*.txt
+!README.md
+!subs.txt
+out_err.txt
+output.log
+error.log
+logs/
+tmp/
+temp/
+
+
+# =============================================================================
+# NODE / REACT FRONTEND
+# =============================================================================
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.cache/
+frontend/.parcel-cache/
+frontend/*.local
+
+# Package manager locks (keep one, ignore the other if mixing)
+# Uncomment if you use yarn:
+# frontend/package-lock.json
+
+# Environment files inside frontend
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+
+# =============================================================================
+# IDEs & EDITORS
+# =============================================================================
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# JetBrains (PyCharm, WebStorm, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim / Neovim
+*.swp
+*.swo
+*~
+
+# Emacs
+\#*\#
+.\#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+
+# =============================================================================
+# OPERATING SYSTEM
+# =============================================================================
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+.Trash-*
+
+
+# =============================================================================
+# MISC
+# =============================================================================
+
+# Compressed files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# SQLite databases
+*.sqlite
+*.sqlite3
+*.db
+
+# Docker
+.dockerignore
+docker-compose.override.yml
