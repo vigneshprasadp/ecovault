@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -110,10 +110,7 @@ const OptimizerDashboard: React.FC = () => {
         }
     };
 
-    const exportPlaybook = () => {
-        toast.success("Cyber Playbook PDF Exported!", { description: "Saved to downloads." });
-        // Prod: generate PDF with reportlab/jsPDF
-    };
+
 
     return (
         <Card className="bg-slate-900/80 border-indigo-500/30 backdrop-blur-sm min-h-[500px]">
@@ -122,9 +119,6 @@ const OptimizerDashboard: React.FC = () => {
                     <span className="flex items-center gap-2">
                         <Crosshair className="h-5 w-5" /> Response Optimizer
                     </span>
-                    <Button onClick={exportPlaybook} variant="outline" size="sm" className="border-indigo-500/50 hover:bg-indigo-900/30 text-indigo-300">
-                        Export Playbook
-                    </Button>
                 </CardTitle>
                 <p className="text-sm text-slate-400">Build ethical intervention scenarios and simulate outcomes using MILP + Monte Carlo</p>
             </CardHeader>

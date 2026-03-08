@@ -6,9 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { getGraph } from '@/lib/api'; // Existing API call
+import { getGraph, getAttackSimulation } from '@/lib/api'; // Existing API call and new simulation call
 import { toast } from 'sonner';
-import { Play, Pause, ZoomIn, Filter, Download } from 'lucide-react';
+import { Play, Pause, ZoomIn, Filter, Download, Skull } from 'lucide-react';
 
 const GraphDashboard: React.FC = () => {
     const fgRef = useRef<any>(); // any to represent the ForceGraph3D instance
@@ -18,6 +18,7 @@ const GraphDashboard: React.FC = () => {
     const [demoCycle, setDemoCycle] = useState(0);
     const [severityFilter, setSeverityFilter] = useState([0, 1]); // Min-max severity slider
     const [autoRefreshInterval, setAutoRefreshInterval] = useState<any>(null);
+    const [simulationData, setSimulationData] = useState<any[]>([]); // New simulation data state
 
     // Color functions for attractiveness
     const getSeverityColor = (severity: number) => {
@@ -31,12 +32,26 @@ const GraphDashboard: React.FC = () => {
     const fetchGraph = useCallback(async (filter?: string) => {
         try {
             const { data } = await getGraph(filter);
-            // Enhance nodes with 3D positions/colors (pre-compute for perf)
-            const nodes = (data.nodes || []).map((node: any) => ({
-                ...node,
-                val: node.severity * 10 + 5, // Size by severity (5-15 radius)
-                color: getSeverityColor(node.severity), // Neon cyberpunk palette
-            }));
+            // If simulation data exists, override colors
+            const simMap = new Map(simulationData.map((s: any) => [s.node_name, s.compromise_probability]));
+
+            const nodes = (data.nodes || []).map((node: any) => {
+                let overrideColor = getSeverityColor(node.severity);
+                let overrideVal = node.severity * 10 + 5;
+                if (simMap.has(node.id)) {
+                    const prob = simMap.get(node.id) as number;
+                    if (prob > 0.7) overrideColor = '#ef4444'; // Red
+                    else if (prob > 0.4) overrideColor = '#eab308'; // Yellow
+                    else overrideColor = '#22c55e'; // Green
+                    overrideVal = prob * 15 + 5;
+                    node.compromise_probability = prob;
+                }
+                return {
+                    ...node,
+                    val: overrideVal,
+                    color: overrideColor,
+                };
+            });
             // Map edges to links using actual returned format (often data.edges or data.links)
             const rawEdges = data.edges || data.links || [];
             const links = rawEdges.map((edge: any, i: number) => ({
@@ -216,6 +231,28 @@ const GraphDashboard: React.FC = () => {
         }
     };
 
+    const runAttackSimulation = async () => {
+        try {
+            toast.info("Running Monte Carlo Attack Simulation...", { id: 'sim-toast' });
+            const { data } = await getAttackSimulation('examplecorp.com');
+            if (data && data.length > 0) {
+                setSimulationData(data);
+                toast.success('Simulation complete. Network updated with compromise probabilities.', { id: 'sim-toast' });
+            } else {
+                toast.warning('No simulation data available. Ensure DWIE pipeline has run.', { id: 'sim-toast' });
+            }
+        } catch (error) {
+            toast.error('Simulation failed.', { id: 'sim-toast' });
+        }
+    };
+
+    // Re-fetch graph when simulation data changes to apply the color overrides
+    useEffect(() => {
+        if (simulationData.length > 0) {
+            fetchGraph();
+        }
+    }, [simulationData, fetchGraph]);
+
     const filteredNodes = graphData.nodes.filter(n => n.severity >= severityFilter[0] && n.severity <= severityFilter[1]);
     const filteredLinks = graphData.links.filter(l =>
         filteredNodes.some(n => (l.source?.id === n.id || l.source === n.id || l.target?.id === n.id || l.target === n.id))
@@ -248,6 +285,14 @@ const GraphDashboard: React.FC = () => {
                             Demo Mode
                             {isDemoPlaying && <Badge variant="secondary" className="ml-2 text-xs">Cycle: {demoCycle}/3</Badge>}
                         </Button>
+                        <Button
+                            variant="secondary"
+                            onClick={runAttackSimulation}
+                            size="sm"
+                            className="bg-purple-600 hover:bg-purple-500 text-white border-none"
+                        >
+                            <Skull className="h-4 w-4 mr-1" /> Run Attack Simulation
+                        </Button>
                         <Slider
                             value={severityFilter}
                             onValueChange={handleFilter}
@@ -279,7 +324,11 @@ const GraphDashboard: React.FC = () => {
                         linkOpacity={0.7}
                         onNodeHover={(node) => {
                             if (node) {
-                                toast.info(`Node: ${node.id} | Risk: ${(node.severity * 100).toFixed(0)}%`, { duration: 1000, id: 'node-hover-toast' });
+                                let riskStr = `Risk: ${(node.severity * 100).toFixed(0)}%`;
+                                if (node.compromise_probability !== undefined) {
+                                    riskStr = `Compromise Prob: ${(node.compromise_probability * 100).toFixed(0)}%`;
+                                }
+                                toast.info(`Node: ${node.id} | ${riskStr}`, { duration: 1000, id: 'node-hover-toast' });
                             }
                         }}
                         onNodeClick={onNodeDoubleClick}

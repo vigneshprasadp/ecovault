@@ -55,4 +55,18 @@ export const validateEvidence = (file: File, contextText: string) => {
     });
 };
 
+// DWIE feature endpoints
+export const startDwieMonitor = () => api.post('/dwie/start-monitor');
+export const getThreatFeed = () => api.get('/dwie/threat-feed');
+export const getThreatScore = (domain: string) => api.get(`/dwie/threat-score/${domain}`);
+export const getPredictions = () => api.get('/dwie/predictions');
+export const getActorNetwork = () => api.get('/dwie/actor-network');
+export const getLeakAuthenticity = (postId: number) => api.get(`/dwie/leak-authenticity/${postId}`);
+export const getAttackSimulation = (domain: string) => api.get(`/dwie/attack-simulation/${domain}`);
+
+// Guard Endpoints
+export const uploadAssets = (data: any) => api.post('/guard/upload-assets', data);
+export const checkPasswordHash = (data: any) => api.post('/guard/check-password', data);
+export const getRecentGuardAlerts = (since: number) => api.get(`/guard/recent-alerts?since=${since}`);
+
 export default api;

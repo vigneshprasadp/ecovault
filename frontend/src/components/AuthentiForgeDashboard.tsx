@@ -4,10 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { UploadCloud, ShieldAlert, ShieldCheck, Download, Search, RefreshCw, AudioLines } from 'lucide-react';
+import { UploadCloud, ShieldAlert, ShieldCheck, Search, RefreshCw } from 'lucide-react';
 import { validateEvidence } from '@/lib/api';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { QRCodeSVG } from 'qrcode.react';
 
 const AuthentiForgeDashboard: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
@@ -110,12 +109,6 @@ const AuthentiForgeDashboard: React.FC = () => {
                                 </div>
                                 <img src={results.heatmap_url} alt="Heatmap" className="w-full h-auto object-contain cursor-crosshair transform hover:scale-[1.02] transition-transform" />
                             </div>
-                            <div className="relative border border-slate-800 rounded-xl overflow-hidden opacity-75">
-                                <div className="absolute top-2 left-2 z-10">
-                                    <Badge variant="secondary" className="bg-slate-900 text-slate-300 border-slate-700">Anonymized Source</Badge>
-                                </div>
-                                <img src={results.anonymized_url} alt="Anonymized" className="w-full h-32 object-cover grayscale" />
-                            </div>
                         </div>
                     )}
 
@@ -179,24 +172,10 @@ const AuthentiForgeDashboard: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="flex items-end justify-between border-t border-slate-800 pt-6 mt-auto">
-                                <div className="flex gap-2">
-                                    <Button variant="outline" size="sm" onClick={() => toast.success("PDF Exported successfully!")} className="border-purple-500/50 hover:bg-purple-900/20 text-purple-300">
-                                        <Download className="h-4 w-4 mr-2" /> Export Report
-                                    </Button>
-                                    <Button variant="ghost" size="sm" onClick={handleReset} className="text-slate-400 hover:text-white">
-                                        Scan New Image
-                                    </Button>
-                                    <Button variant="ghost" size="icon" onClick={() => toast('Narrating results...', { icon: <AudioLines className="h-4 w-4" /> })} className="text-slate-400">
-                                        <AudioLines className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                                <div className="text-right flex flex-col items-end">
-                                    <span className="text-[10px] text-slate-500 mb-2 font-mono uppercase">Decrypted Link</span>
-                                    <div className="bg-white p-1 rounded-md shadow-[0_0_10px_rgba(255,255,255,0.1)]">
-                                        <QRCodeSVG value="https://echovault.ai/secure-report-12345" size={48} level="L" marginSize={0} />
-                                    </div>
-                                </div>
+                            <div className="flex items-center justify-center border-t border-slate-800 pt-6 mt-auto">
+                                <Button variant="ghost" size="sm" onClick={handleReset} className="text-slate-400 hover:text-white">
+                                    Scan New Image
+                                </Button>
                             </div>
                         </div>
                     ) : (

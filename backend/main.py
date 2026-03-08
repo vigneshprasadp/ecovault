@@ -11,8 +11,12 @@ from fastapi.responses import JSONResponse
 
 from .api.dependencies import limiter
 from .api.v1.endpoints import detection, chat, graph, blockchain, alerts, simulation, forensics, optimize, authentiforge
+from .dwie import api_routes as dwie_router
+from .guard import api_routes as guard_router
+from .shadowpulse.crawler import get_crawler
 from .core.config import settings
 from .core.logger import logger
+import asyncio
 from .services.model_loader import model_service
 
 
@@ -23,6 +27,11 @@ async def lifespan(app: FastAPI):
     logger.info("EchoVault backend starting…", debug=settings.DEBUG)
     model_service.load()
     logger.info("Startup complete ✓")
+
+    # Start ShadowPulse Dark Web Crawler
+    crawler = get_crawler()
+    asyncio.create_task(crawler.start_routine())
+    
     yield
     # Shutdown
     logger.info("EchoVault backend shutting down")
@@ -76,6 +85,8 @@ app.include_router(simulation.router, prefix=PREFIX)
 app.include_router(forensics.router,  prefix=PREFIX)
 app.include_router(optimize.router,   prefix=PREFIX)
 app.include_router(authentiforge.router, prefix=PREFIX)
+app.include_router(dwie_router.router, prefix="/api/v1")
+app.include_router(guard_router.router, prefix="/api/v1")
 
 
 # ── Health check ─────────────────────────────────────────────────────────────

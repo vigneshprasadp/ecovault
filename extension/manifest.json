@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "EchoVault Guard",
+    "version": "1.0.0",
+    "description": "Active cyber guardian system. Blocks unsafe dark web interactions and credential leaks.",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "webRequest",
+        "scripting"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "action": {
+        "default_title": "EchoVault Guard"
+    }
+}
